@@ -28,7 +28,7 @@ class HeadHunterAPI(WebsiteAPI):
 
     @staticmethod
     def get_vacancies(keyword: str, count_page: int):
-        """Возвращает 500 вакансий по России по ключевому слову keyword"""
+        """Возвращает вакансии по России по ключевому слову keyword"""
 
         vacancies_hh = []
 
@@ -36,7 +36,8 @@ class HeadHunterAPI(WebsiteAPI):
             "text": keyword,
             "area": 113,
             "page": count_page,
-            "per_page": 100
+            "per_page": 100,
+            "archive": False
         }
 
         for page in range(count_page):
@@ -47,12 +48,48 @@ class HeadHunterAPI(WebsiteAPI):
                 data = response.json()
                 vacancies_hh.extend(data["items"])
 
-                time.sleep(0.5)
+                time.sleep(0.1)
 
             else:
                 print(f"Request failed with status code: {response.status_code}")
 
         return vacancies_hh
+
+    @staticmethod
+    def formatted_vacancies(vacancies_hh):
+
+        res = requests.get('https://www.cbr-xml-daily.ru/daily_json.js').json()
+        dollar_rate = res['Valute']['USD']['Value']
+
+        formatted_vacancies = []
+
+        for v in vacancies_hh:
+            formatted_v = dict()
+            formatted_v["name"] = v["name"]
+
+            if v["salary"] is None:
+                formatted_v["salary_from"] = 0
+                formatted_v["salary_to"] = 0
+                formatted_v["currency"] = "RUB"
+            elif v["salary"]["currency"] == "RUR":
+                formatted_v["salary_from"] = 0 if v["salary"]["from"] is None else v["salary"]["from"]
+                formatted_v["salary_to"] = 0 if v["salary"]["to"] is None else v["salary"]["to"]
+                formatted_v["currency"] = "RUB"
+            elif v["salary"]["currency"] == "USD":
+                formatted_v["salary_from"] = v["salary"]["from"] * dollar_rate
+                formatted_v["salary_to"] = v["salary"]["to"] * dollar_rate
+                formatted_v["currency"] = "RUB"
+
+            formatted_v["city"] = "Не указанно" if v["address"] is None else v["address"]["city"]
+            formatted_v["url"] = v["alternate_url"]
+            formatted_v["employer"] = v["employer"]["name"]
+            formatted_v["requirement"] = v["snippet"]["requirement"]
+            formatted_v["experience"] = v["experience"]["name"]
+            formatted_v["API"] = "HeadHunter"
+
+            formatted_vacancies.append(formatted_v)
+
+        return formatted_vacancies
 
 
 class SuperJobAPI(WebsiteAPI):
@@ -62,7 +99,7 @@ class SuperJobAPI(WebsiteAPI):
 
     @staticmethod
     def get_vacancies(keyword: str, count_page: int):
-        """Возвращает 500 вакансий по России по ключевому слову keyword"""
+        """Возвращает вакансии по России по ключевому слову keyword"""
 
         vacancies_sj = []
 
@@ -72,12 +109,13 @@ class SuperJobAPI(WebsiteAPI):
 
         params = {
             "keyword": keyword,
-            "c": 1,
+            "c": [1],
             "page": count_page,
-            "count": 100,
+            # "count": 100,
+            "archive": False
         }
 
-        for page in range(count_page):
+        for page in range(count_page * 5):
 
             response = requests.get(SuperJobAPI.url, params=params, headers=headers)
 
@@ -85,9 +123,31 @@ class SuperJobAPI(WebsiteAPI):
                 data = response.json()
                 vacancies_sj.extend(data["objects"])
 
-                time.sleep(0.5)
+                time.sleep(0.1)
 
             else:
                 print(f"Request failed with status code: {response.status_code}")
 
         return vacancies_sj
+
+    @staticmethod
+    def formatted_vacancies(vacancies_sj):
+
+        formatted_vacancies = []
+
+        for v in vacancies_sj:
+            formatted_v = dict()
+            formatted_v["name"] = v["profession"]
+            formatted_v["salary_from"] = v["payment_from"]
+            formatted_v["salary_to"] = v["payment_to"]
+            formatted_v["currency"] = "RUB" if v["currency"] == "rub" else None
+            formatted_v["city"] = v["client"]["town"]["title"]
+            formatted_v["url"] = v["link"]
+            formatted_v["employer"] = v["client"]["title"]
+            formatted_v["requirement"] = v["candidat"]
+            formatted_v["experience"] = v["experience"]["title"]
+            formatted_v["API"] = "SuperJob"
+
+            formatted_vacancies.append(formatted_v)
+
+        return formatted_vacancies
