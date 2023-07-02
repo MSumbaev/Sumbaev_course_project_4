@@ -8,11 +8,30 @@ class Vacancy:
         self.url = vacancy["url"]
         self.employer = vacancy["employer"]
         self.requirement = vacancy["requirement"]
-        self.experience = vacancy["experience"]
-        self.API = vacancy["API"]
-
-    def __gt__(self, other):
-        pass
+        self.api = vacancy["API"]
 
     def __str__(self):
-        pass
+        return f"""
+{"**********" * 5}
+Название вакансии: {self.name}
+Зарплата от: {self.salary_from} {self.currency if self.currency == "RUB" else ""}
+Зарплата до: {self.salary_to} {self.currency if self.currency == "RUB" else ""}
+Город: {self.city}
+url: {self.url}
+Работодатель: {self.employer}
+Требования: {self.requirement}
+Вакансия найдена на: {self.api}
+{"**********" * 5}
+"""
+
+    def __lt__(self, other):
+        return self.salary_from < other.salary_from
+
+    def __le__(self, other):
+        return self.salary_from <= other.salary_from
+
+    def __gt__(self, other):
+        return self.salary_from > other.salary_from
+
+    def __ge__(self, other):
+        return self.salary_from >= other.salary_from

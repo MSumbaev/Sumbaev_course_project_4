@@ -60,6 +60,7 @@ class HeadHunterAPI(WebsiteAPI):
 
         res = requests.get('https://www.cbr-xml-daily.ru/daily_json.js').json()
         dollar_rate = res['Valute']['USD']['Value']
+        euro_rate = res['Valute']['EUR']['Value']
 
         formatted_vacancies = []
 
@@ -68,23 +69,34 @@ class HeadHunterAPI(WebsiteAPI):
             formatted_v["name"] = v["name"]
 
             if v["salary"] is None:
-                formatted_v["salary_from"] = 0
-                formatted_v["salary_to"] = 0
+                formatted_v["salary_from"] = "Не указано"
+                formatted_v["salary_to"] = "Не указано"
                 formatted_v["currency"] = "RUB"
             elif v["salary"]["currency"] == "RUR":
-                formatted_v["salary_from"] = 0 if v["salary"]["from"] is None else v["salary"]["from"]
-                formatted_v["salary_to"] = 0 if v["salary"]["to"] is None else v["salary"]["to"]
+                formatted_v["salary_from"] = "Не указано" if v["salary"]["from"] is None else v["salary"]["from"]
+                formatted_v["salary_to"] = "Не указано" if v["salary"]["to"] is None else v["salary"]["to"]
                 formatted_v["currency"] = "RUB"
             elif v["salary"]["currency"] == "USD":
-                formatted_v["salary_from"] = v["salary"]["from"] * dollar_rate
-                formatted_v["salary_to"] = v["salary"]["to"] * dollar_rate
+                formatted_v["salary_from"] = "Не указано" if v["salary"]["from"] is None else v["salary"][
+                                                                                                  "from"] * dollar_rate
+                formatted_v["salary_to"] = "Не указано" if v["salary"]["to"] is None else v["salary"][
+                                                                                              "to"] * dollar_rate
                 formatted_v["currency"] = "RUB"
+            elif v["salary"]["currency"] == "EUR":
+                formatted_v["salary_from"] = "Не указано" if v["salary"]["from"] is None else v["salary"][
+                                                                                                  "from"] * euro_rate
+                formatted_v["salary_to"] = "Не указано" if v["salary"]["to"] is None else v["salary"][
+                                                                                              "to"] * euro_rate
+                formatted_v["currency"] = "RUB"
+            elif v["salary"]["currency"] not in ["EUR", "USD", "RUR"]:
+                formatted_v["salary_from"] = "Не указано"
+                formatted_v["salary_to"] = "Не указано"
+                formatted_v["currency"] = "Не известная валюта для уточнения перейдите по ссылке"
 
             formatted_v["city"] = "Не указанно" if v["address"] is None else v["address"]["city"]
             formatted_v["url"] = v["alternate_url"]
             formatted_v["employer"] = v["employer"]["name"]
             formatted_v["requirement"] = v["snippet"]["requirement"]
-            formatted_v["experience"] = v["experience"]["name"]
             formatted_v["API"] = "HeadHunter"
 
             formatted_vacancies.append(formatted_v)
@@ -145,7 +157,6 @@ class SuperJobAPI(WebsiteAPI):
             formatted_v["url"] = v["link"]
             formatted_v["employer"] = v["client"]["title"]
             formatted_v["requirement"] = v["candidat"]
-            formatted_v["experience"] = v["experience"]["title"]
             formatted_v["API"] = "SuperJob"
 
             formatted_vacancies.append(formatted_v)
