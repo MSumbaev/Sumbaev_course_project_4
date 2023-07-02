@@ -48,7 +48,7 @@ class HeadHunterAPI(WebsiteAPI):
                 data = response.json()
                 vacancies_hh.extend(data["items"])
 
-                time.sleep(0.1)
+                time.sleep(0.2)
 
             else:
                 print(f"Request failed with status code: {response.status_code}")
