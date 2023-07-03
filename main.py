@@ -7,11 +7,13 @@ def main():
     while True:
         formatted_vacancies = []
 
+        # Выбираем какие использовать API
         platforms = funcs.select_apis()
 
         if platforms == "exit":
             return
 
+        # Выбираем количество полученных вакансий из API
         select_count_v = funcs.select_count_vacancies(platforms)
 
         if select_count_v == "exit":
@@ -20,13 +22,21 @@ def main():
         user_keyword = input("Введите ключевое слово по которому хотите найти вакансии:\n")
         print("Идет поиск вакансий...")
 
+        # Выполняется запрос к API, получаем вакансии и приводим к отформатированному формату
         for api in platforms:
             v_from_api = api.get_vacancies(user_keyword, int(select_count_v))
             formatted_vacancies.extend(api.formatted_vacancies(v_from_api))
 
-        print(f"\nНайдено {len(formatted_vacancies)} вакансий\n")
+        # Вывод числа полученных вакансий
+        if len(formatted_vacancies) == 0:
+            print("По данному запросу вакансии не найдены")
+            continue
+        else:
+            print(f"\nНайдено {len(formatted_vacancies)} вакансий\n")
+
         user_select = ''
 
+        # Цикл по выбору работы с файлом для полученных вакансий
         while user_select not in ["1", "2", "return"]:
 
             print(f"Чтобы продолжить выберите действие:\n "
@@ -41,6 +51,7 @@ def main():
             if user_select not in ["1", "2", "return"]:
                 print("Не корректный ввод")
 
+        # Запись/добавление вакансий в json-файл с именем поискового запроса либо возврат к поиску
         js = JSONSaver(user_keyword)
         if user_select == "return":
             continue
@@ -51,21 +62,18 @@ def main():
 
         user_select = ''
 
+        # Цикл по выбору действий с вакансиями
         while user_select != "return":
             print(f"Выберите действие:\n"
                   f" 1 - Показать все вакансии;\n"
-                  f" 2 - Показать топ N вакансий по минимальной зарплате;\n"
-                  f" 3 - Показать топ N вакансий по максимальной зарплате;\n"
-                  f" 4 - Показать вакансии по заданному диапазону зарплаты;\n"
-                  f" 5 - Показать вакансии в указанном городе;\n"
-                  f" 6 - Найти вакансии по ключевым словам;\n"
+                  f" 2 - Отфильтровать вакансии;\n"
                   f"Чтобы очистить файл с вакансиями и вернуться к поиску введите 'clean';\n"
                   f"Чтобы вернуться к поиску вакансий введите 'return';\n"
                   f"Для выхода введите 'exit'.")
 
             user_select = input().lower()
 
-            if user_select not in ["1", "2", "3", "4", "5", "6", "return", "exit", "clean"]:
+            if user_select not in ["1", "2", "return", "exit", "clean"]:
                 print("\nНе корректный ввод\n")
                 continue
 
@@ -73,33 +81,18 @@ def main():
                 return
             elif user_select == "return":
                 continue
-            elif user_select == "1":
-                for v in js.choose_all():
-                    print(v)
-            elif user_select == "2":
-                for v in js.top_by_salary_from():
-                    print(v)
-            elif user_select == "3":
-                for v in js.top_by_salary_to():
-                    print(v)
-            elif user_select == "4":
-                salary_range = input("Введите диапазон зарплаты через дефис.\n"
-                                     "Пример ввода: 1000-100000\n")
-                for v in js.get_vacancies_by_salary(salary_range):
-                    print(v)
-            elif user_select == "5":
-                city_input = input("Введите название города:\n")
-                for v in js.get_vacancies_by_city(city_input):
-                    print(v)
-            elif user_select == "6":
-                input_keywords = input("Введите ключевые слова через пробел:\n")
-                for v in js.filter_words(input_keywords):
-                    print(v)
             elif user_select == "clean":
                 js.clean_file()
                 user_select = "return"
                 print("\nФайл очищен.\n")
                 continue
+            elif user_select == "1":
+                for v in js.choose_all():
+                    print(v)
+            elif user_select == "2":
+
+                # Фильтрация вакансий по заданным критериям и их вывод в консоль
+                funcs.filtering_of_vacancies(user_keyword)
 
 
 if __name__ == '__main__':

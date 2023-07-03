@@ -11,6 +11,16 @@ class FileSaver(ABC):
         """Сохранение списка вакансий в файл"""
         pass
 
+    @abstractmethod
+    def add_vacancies(self, data_vacancies):
+        """Добавление вакансий в файл"""
+        pass
+
+    @abstractmethod
+    def clean_file(self):
+        """Очищает файл с вакансиями"""
+        pass
+
 
 class JSONSaver(FileSaver):
     """Класс для работы с вакансиями в json файле"""
@@ -40,8 +50,6 @@ class JSONSaver(FileSaver):
             with open(f'data/{self.file_name}.json', 'w', encoding='utf-8') as f:
                 json.dump(data_vacancies, f, indent=2, ensure_ascii=False)
 
-            print("Операция прошла успешно")
-
     def clean_file(self):
         """Очищает файл с вакансиями"""
         with open(f'data/{self.file_name}.json', 'w', encoding='utf-8') as f:
@@ -55,45 +63,56 @@ class JSONSaver(FileSaver):
         vacancies = [Vacancy(v) for v in all_vacancies]
         return vacancies
 
-    def top_by_salary_from(self):
+    @staticmethod
+    def sort_by_salary_from(data_vacancies):
         """Возвращает список топ отсортированных экземпляров класса Vacancy по минимальной зарплате.
         Экземпляры где не указана минимальная зарплата перемещаются в конец списка"""
-        data_vacancies = self.choose_all()
+        # data_vacancies = self.choose_all()
         v_without_salary = [v for v in data_vacancies if isinstance(v.salary_from, str)]
         v_with_salary = [v for v in data_vacancies if isinstance(v.salary_from, int)]
         sorted_vacancies = sorted(v_with_salary, reverse=True)
         sorted_vacancies.extend(v_without_salary)
         return sorted_vacancies
 
-    def top_by_salary_to(self):
+    @staticmethod
+    def sort_by_salary_to(data_vacancies):
         """Возвращает список топ отсортированных экземпляров класса Vacancy по максимальной зарплате.
         Экземпляры где не указана максимальная зарплата перемещаются в конец списка"""
-        data_vacancies = self.choose_all()
+        # data_vacancies = self.choose_all()
         v_without_salary = [v for v in data_vacancies if isinstance(v.salary_to, str)]
         v_with_salary = [v for v in data_vacancies if isinstance(v.salary_to, int)]
         sorted_vacancies = sorted(v_with_salary, key=lambda x: x.salary_to, reverse=True)
         sorted_vacancies.extend(v_without_salary)
         return sorted_vacancies
 
-    def get_vacancies_by_salary(self, salary_range: str):
+    @staticmethod
+    def get_vacs_by_salary_range(data_vacancies, salary_range: str):
         """Возвращает список вакансий из заданного диапазона зарплаты"""
-        salary_range_list = salary_range.split("-")
-        data_vacancies = self.choose_all()
-        filtered_v = []
+        range_list = salary_range.split("-")
+
+        if len(range_list) != 2:
+            print("Не корректный ввод")
+            return
+
+        for num in range_list:
+            if num.isalpha() or num == "":
+                print("Не корректный ввод")
+                return
+
+        min_r = int(range_list[0])
+        max_r = int(range_list[1])
+        filtered_vacancies = []
+
         for v in data_vacancies:
             if isinstance(v.salary_from, int) and isinstance(v.salary_to, int):
-                if int(salary_range_list[0]) <= v.salary_from <= int(salary_range_list[1]):
-                    if int(salary_range_list[0]) <= v.salary_to <= int(salary_range_list[1]):
-                        filtered_v.append(v)
+                if (v.salary_from <= min_r <= v.salary_to) or (v.salary_from <= max_r <= v.salary_to):
+                    filtered_vacancies.append(v)
 
-        if filtered_v == list():
-            return ["К сожалению нет вакансий с таким диапазоном зарплат."]
-        else:
-            return filtered_v
+        return filtered_vacancies
 
-    def get_vacancies_by_city(self, city_input: str):
+    @staticmethod
+    def get_vacancies_by_city(data_vacancies, city_input: str):
         """Возвращает вакансии по указанному городу"""
-        data_vacancies = self.choose_all()
         v_in_city = []
 
         for v in data_vacancies:
@@ -101,26 +120,22 @@ class JSONSaver(FileSaver):
                 if v.city.lower() == city_input.lower():
                     v_in_city.append(v)
 
-        if v_in_city == list():
-            return ["К сожалению в указанном городе нет вакансий."]
-        else:
-            return v_in_city
+        return v_in_city
 
-    def filter_words(self, keywords: str):
+    @staticmethod
+    def filter_words(data_vacancies, keywords: str):
         """Возвращает список вакансий где встречаются ключевые слова.
         Ключевые слова записаны через пробел."""
         filtered_vacancies = []
-        data_vacancies = self.choose_all()
         keywords_list = keywords.lower().split()
 
         for keyword in keywords_list:
             for v in data_vacancies:
-                if keyword in v.name:
-                    filtered_vacancies.append(v)
-                elif keyword in v.requirement:
-                    filtered_vacancies.append(v)
+                if v.name:
+                    if keyword in v.name.lower():
+                        filtered_vacancies.append(v)
+                elif v.requirement:
+                    if keyword in v.requirement.lower():
+                        filtered_vacancies.append(v)
 
-        if filtered_vacancies == list():
-            return ["Нет вакансий, соответствующих заданным критериям."]
-        else:
-            return filtered_vacancies
+        return filtered_vacancies

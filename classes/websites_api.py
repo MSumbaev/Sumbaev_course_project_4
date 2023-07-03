@@ -56,7 +56,9 @@ class HeadHunterAPI(WebsiteAPI):
         return vacancies_hh
 
     @staticmethod
-    def formatted_vacancies(vacancies_hh):
+    def formatted_vacancies(vacancies_hh: list):
+        """ Возвращает список вакансий в отформатированном виде.
+        :param vacancies_hh - список неотформатированных вакансий"""
 
         res = requests.get('https://www.cbr-xml-daily.ru/daily_json.js').json()
         dollar_rate = res['Valute']['USD']['Value']
@@ -143,7 +145,9 @@ class SuperJobAPI(WebsiteAPI):
         return vacancies_sj
 
     @staticmethod
-    def formatted_vacancies(vacancies_sj):
+    def formatted_vacancies(vacancies_sj: list):
+        """ Возвращает список вакансий в отформатированном виде.
+        :param vacancies_sj - список неотформатированных вакансий"""
 
         formatted_vacancies = []
 

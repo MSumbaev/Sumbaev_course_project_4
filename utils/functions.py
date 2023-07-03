@@ -1,4 +1,5 @@
 from classes.websites_api import HeadHunterAPI, SuperJobAPI
+from classes.json_saver import JSONSaver
 
 
 def select_apis():
@@ -71,3 +72,80 @@ def select_count_vacancies(platforms: list):
             print("Не корректный ввод. Попробуйте еще раз.\n")
             count_vacancies = ""
             continue
+
+
+def filtering_of_vacancies(filename: str):
+    """ Функция производит фильтрацию вакансий по выбранным параметрам, печатает результат.
+    :param filename - название файла указывается без расширения"""
+
+    js = JSONSaver(filename)
+
+    user_choice = ''
+
+    while user_choice != "return":
+
+        vacancies = js.choose_all()
+
+        user_choice = input(f"Введите через пробел интересующие номера для фильтрации вакансий:\n"
+                            f" 1 - Сортировать вакансии по минимальной зарплате;\n"
+                            f" 2 - Сортировать вакансии по максимальной зарплате;\n"
+                            f" 3 - Выбрать вакансии по заданному диапазону зарплаты;\n"
+                            f" 4 - Выбрать вакансии по указанному городу;\n"
+                            f" 5 - Выбрать вакансии по ключевым словам;\n"
+                            f"Чтобы вернуться к поиску вакансий введите 'return';\n").lower()
+
+        if user_choice == "return":
+            continue
+
+        select_nums = user_choice.split()
+        good_input = None
+
+        for num in select_nums:
+            if num.isalpha():
+                good_input = False
+            else:
+                good_input = True
+
+        if not good_input:
+            print("\nНе корректный ввод\n")
+            user_choice = ""
+            continue
+
+        for num in select_nums:
+            if num == "1":
+                vacancies = js.sort_by_salary_from(vacancies)
+
+            elif num == "2":
+                vacancies = js.sort_by_salary_to(vacancies)
+
+            elif num == "3":
+                input_range = input("Введите диапазон зарплаты через тире.Числа должны быть целыми!\n")
+
+                if "-" not in input_range:
+                    return ["Не корректный ввод"]
+
+                vacancies = js.get_vacs_by_salary_range(vacancies, input_range)
+
+                if vacancies == list():
+                    print("Нет вакансий с таким диапазоном зарплат")
+                    continue
+
+            elif num == "4":
+                city_input = input("Введите название города:\n")
+                vacancies = js.get_vacancies_by_city(vacancies, city_input)
+
+                if vacancies == list():
+                    print("К сожалению в указанном городе нет вакансий.")
+                    continue
+
+            elif num == "5":
+                input_keywords = input("Введите ключевые слова через пробел:\n")
+                vacancies = js.filter_words(vacancies, input_keywords)
+
+                if vacancies == list():
+                    print("Нет вакансий, соответствующих заданным критериям.")
+                    continue
+
+        for v in vacancies:
+            print(v)
+        continue
