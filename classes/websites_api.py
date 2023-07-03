@@ -1,10 +1,11 @@
+import os
 from abc import ABC, abstractmethod
 import requests
 import time
 import json
 
 # Необходимо получить ТОКЕН SuperJob API и записать его в переменную окружения SUP_JOB_API_KEY
-SUP_JOB_API_KEY = "v3.r.137650543.fe3caecc42c54edeee673c44f9f6a876873dbc25.3646af457c3f1f980e0297c8188c28921d80d383"
+api_key: str = os.getenv("SUP_JOB_API_KEY")  # SUP_JOB_API_KEY
 
 
 def printj(obj) -> None:
@@ -118,7 +119,7 @@ class SuperJobAPI(WebsiteAPI):
         vacancies_sj = []
 
         headers = {
-            "X-Api-App-Id": SUP_JOB_API_KEY
+            "X-Api-App-Id": api_key
         }
 
         params = {
