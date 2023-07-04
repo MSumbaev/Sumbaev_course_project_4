@@ -35,7 +35,7 @@ def select_apis():
             continue
 
 
-def select_count_vacancies(platforms: list):
+def select_count_vacancies(platforms: list) -> str:
     """Запрашивает у пользователя и возвращает выбор количества вакансий,
      исходя из переданного списка с экземплярами API"""
     count_vacancies = ""

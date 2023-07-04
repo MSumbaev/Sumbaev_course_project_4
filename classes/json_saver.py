@@ -7,17 +7,17 @@ class FileSaver(ABC):
     """Абстрактный класс для работы с вакансиями в файлах"""
 
     @abstractmethod
-    def create_file(self, vacancies):
+    def create_file(self, found_vacancies: list) -> None:
         """Сохранение списка вакансий в файл"""
         pass
 
     @abstractmethod
-    def add_vacancies(self, data_vacancies):
+    def add_vacancies(self, data_vacancies: list) -> None:
         """Добавление вакансий в файл"""
         pass
 
     @abstractmethod
-    def clean_file(self):
+    def clean_file(self) -> None:
         """Очищает файл с вакансиями"""
         pass
 
@@ -28,13 +28,13 @@ class JSONSaver(FileSaver):
     def __init__(self, file_name: str):
         self.file_name = file_name
 
-    def create_file(self, found_vacancies):
+    def create_file(self, found_vacancies: list) -> None:
         """Сохранение списка вакансий в json файл"""
         with open(f'data/{self.file_name}.json', 'w', encoding='utf-8') as f:
             json.dump(found_vacancies, f, indent=2, ensure_ascii=False)
         print("Файл сохранен в папку data/.")
 
-    def add_vacancies(self, data_vacancies):
+    def add_vacancies(self, data_vacancies: list) -> None:
         """Добавление вакансий в json файл. Если файл не существует, создает его."""
         try:
             with open(f'data/{self.file_name}.json', 'r', encoding='utf-8') as f:
@@ -50,7 +50,7 @@ class JSONSaver(FileSaver):
             with open(f'data/{self.file_name}.json', 'w', encoding='utf-8') as f:
                 json.dump(data_vacancies, f, indent=2, ensure_ascii=False)
 
-    def clean_file(self):
+    def clean_file(self) -> None:
         """Очищает файл с вакансиями"""
         with open(f'data/{self.file_name}.json', 'w', encoding='utf-8') as f:
             f.write("")
@@ -64,7 +64,7 @@ class JSONSaver(FileSaver):
         return vacancies
 
     @staticmethod
-    def sort_by_salary_from(data_vacancies):
+    def sort_by_salary_from(data_vacancies: list) -> list:
         """Возвращает список топ отсортированных экземпляров класса Vacancy по минимальной зарплате.
         Экземпляры где не указана минимальная зарплата перемещаются в конец списка"""
         # data_vacancies = self.choose_all()
@@ -75,7 +75,7 @@ class JSONSaver(FileSaver):
         return sorted_vacancies
 
     @staticmethod
-    def sort_by_salary_to(data_vacancies):
+    def sort_by_salary_to(data_vacancies: list) -> list:
         """Возвращает список топ отсортированных экземпляров класса Vacancy по максимальной зарплате.
         Экземпляры где не указана максимальная зарплата перемещаются в конец списка"""
         # data_vacancies = self.choose_all()
@@ -86,7 +86,7 @@ class JSONSaver(FileSaver):
         return sorted_vacancies
 
     @staticmethod
-    def get_vacs_by_salary_range(data_vacancies, salary_range: str):
+    def get_vacs_by_salary_range(data_vacancies: list, salary_range: str):
         """Возвращает список вакансий из заданного диапазона зарплаты"""
         range_list = salary_range.split("-")
 
@@ -111,7 +111,7 @@ class JSONSaver(FileSaver):
         return filtered_vacancies
 
     @staticmethod
-    def get_vacancies_by_city(data_vacancies, city_input: str):
+    def get_vacancies_by_city(data_vacancies: list, city_input: str) -> list:
         """Возвращает вакансии по указанному городу"""
         v_in_city = []
 
@@ -123,7 +123,7 @@ class JSONSaver(FileSaver):
         return v_in_city
 
     @staticmethod
-    def filter_words(data_vacancies, keywords: str):
+    def filter_words(data_vacancies: list, keywords: str) -> list:
         """Возвращает список вакансий где встречаются ключевые слова.
         Ключевые слова записаны через пробел."""
         filtered_vacancies = []

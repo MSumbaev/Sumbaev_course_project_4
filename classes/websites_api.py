@@ -18,7 +18,7 @@ class WebsiteAPI(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_vacancies(keyword, count_page):
+    def get_vacancies(keyword: str, count_page: int):
         pass
 
 
@@ -28,7 +28,7 @@ class HeadHunterAPI(WebsiteAPI):
     url = 'https://api.hh.ru/vacancies'
 
     @staticmethod
-    def get_vacancies(keyword: str, count_page: int):
+    def get_vacancies(keyword: str, count_page: int) -> list:
         """Возвращает вакансии по России по ключевому слову keyword"""
 
         vacancies_hh = []
@@ -57,7 +57,7 @@ class HeadHunterAPI(WebsiteAPI):
         return vacancies_hh
 
     @staticmethod
-    def formatted_vacancies(vacancies_hh: list):
+    def formatted_vacancies(vacancies_hh: list) -> list:
         """ Возвращает список вакансий в отформатированном виде.
         :param vacancies_hh - список неотформатированных вакансий"""
 
@@ -113,7 +113,7 @@ class SuperJobAPI(WebsiteAPI):
     url = 'https://api.superjob.ru/2.0/vacancies/'
 
     @staticmethod
-    def get_vacancies(keyword: str, count_page: int):
+    def get_vacancies(keyword: str, count_page: int) -> list:
         """Возвращает вакансии по России по ключевому слову keyword"""
 
         vacancies_sj = []
@@ -146,7 +146,7 @@ class SuperJobAPI(WebsiteAPI):
         return vacancies_sj
 
     @staticmethod
-    def formatted_vacancies(vacancies_sj: list):
+    def formatted_vacancies(vacancies_sj: list) -> list:
         """ Возвращает список вакансий в отформатированном виде.
         :param vacancies_sj - список неотформатированных вакансий"""
 
